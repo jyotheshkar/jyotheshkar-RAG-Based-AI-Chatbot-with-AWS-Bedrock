@@ -4,20 +4,28 @@
 
 **Project Link:** [View Project](http://learn.nextwork.org/projects/ai-rag-bedrock)
 
-**Author:** jyothesh karnam  
+**Author:** Jyothesh Karnam  
 **Email:** jyotheshkar@gmail.com
 
 ---
 
-## Set Up a RAG Chatbot in Bedrock
+## Portfolio Scope
 
-![Image](http://learn.nextwork.org/serene_orange_smart_fox/uploads/ai-rag-bedrock_d5e8f1g2)
+**Maturity:** Personal guided AWS learning lab. This repository contains a lab write-up, an architecture image and a PDF. It does not include application source code, infrastructure as code or an automated evaluation suite.
+
+- [Local architecture diagram](architecture-complete.png)
+- [Lab PDF](legendary-ai-rag-bedrock.pdf)
+- [Evidence, design decisions and limitations](docs/PORTFOLIO_EVIDENCE.md)
+
+The following notes describe the original exercise. Model availability, access steps and pricing must be checked against current AWS documentation before repeating it. No live endpoint, current deployment or benchmark is claimed here.
+
+![Document storage, Bedrock knowledge base, embeddings, vector store and model flow](architecture-complete.png)
 
 ---
 
 ## Introducing Today's Project!
 
-RAG (Retrieval Augmented Generation) is an AI techniquie that lets you train an AI model on your own personal documents. In this project, I will demonstrate RAG by setting up a RAG chatbot in Amazon Bedrock.
+Retrieval Augmented Generation (RAG) retrieves information from a document source and adds it to the context used to generate a response. This lab explores that workflow with Amazon Bedrock; it does not train or fine-tune a model on the documents. See the [AWS explanation of how knowledge bases work](https://docs.aws.amazon.com/bedrock/latest/userguide/kb-how-it-works.html).
 
 ### Tools and concepts
 
@@ -39,7 +47,7 @@ Amazon Bedrock is an AWS service that makes it easy to build generative AI appli
 
 My Knowledge Base is connected to S3 because S3 is going to be the storage/source for my Knowledge Base's raw documents. S3 is AWS’s storage service, where you can store all kinds of objects (e.g. videos, documents, audio) in the same bucket.
 
-In an S3 bucket, I uploaded the documents that will make up my chatbot’s knowledge. My S3 bucket is in the same region as my Knowledge Base because Bedrock is a regional service – data must live in the same region as the Bedrock resource (Kbase).
+In an S3 bucket, I uploaded the documents that will make up my chatbot’s knowledge. For the original lab, I placed the S3 bucket and knowledge base in the same AWS Region. Check the current service requirements before reproducing the setup.
 
 ![Image](http://learn.nextwork.org/serene_orange_smart_fox/uploads/ai-rag-bedrock_b5c8d1e2)
 
@@ -49,9 +57,9 @@ In an S3 bucket, I uploaded the documents that will make up my chatbot’s knowl
 
 My Knowledge Base uses a vector store, which means a search engine/database that stores data based on their semantic meaning! When I query my Knowledge Base, OpenSearch will find the relevant chunks of data to the query, and pass it to Bedrock.
 
-Embeddings are vector representations of the semantic meaning of a chunk of text. The embedding model I’m using is Titan Text Embeddings v2 because it’s fast, accurate and a lot more affordable!
+Embeddings are vector representations of the semantic meaning of a chunk of text. The lab notes identify Titan Text Embeddings v2 as the embedding model. No comparative accuracy, latency or cost benchmark is included in this repository.
 
-Chunking is the process of splitting large documents into smaller, manageable pieces called chunks, which makes it easier for the model to retrieve and understand relevant information during a query. In my Knowledge Base, chunks are set to a specific size and overlap value to ensure context is preserved across splits, improving the accuracy of responses.
+Chunking splits documents into smaller pieces for retrieval. Chunk size and overlap affect which context is available across boundaries; their impact on answer quality must be measured. This repository does not provide a reproducible chunking configuration or an accuracy benchmark.
 
 ![Image](http://learn.nextwork.org/serene_orange_smart_fox/uploads/ai-rag-bedrock_p9r2s5t8)
 
@@ -61,7 +69,7 @@ Chunking is the process of splitting large documents into smaller, manageable pi
 
 AI models are important for my chatbot because they’re the translator of my Knowledge Base’s search results into human-like text. Without AI models, my chatbot would only respond with chunks of text from my documents – which isn’t the best experience!
 
-To access an AI model in Bedrock, I had to visit the "Model Access" page and request access explicitly! AWS needs explicit access because some AI model providers have extra forms/rules if you wanted to use them, and AWS needs to check availability.
+During the original exercise, I used the console model-access workflow. This is a historical lab observation, not a current setup instruction; model access and regional availability should be checked in the [current AWS documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html).
 
 ![Image](http://learn.nextwork.org/serene_orange_smart_fox/uploads/ai-rag-bedrock_model-access-proof)
 
@@ -69,7 +77,7 @@ To access an AI model in Bedrock, I had to visit the "Model Access" page and req
 
 ## Syncing the Knowledge Base
 
-Even though I’ve already connected my S3 bucket when creating the Knowledge Base, I still need to sync my data, which will actually move the data from S3 and into my Knowledge Base + OpenSearch Serverless. Currently, the Knowledge Base is empty!
+Connecting the S3 data source was followed by an ingestion/sync step in the exercise. The notes below describe that historical workflow; they do not establish the current state of any AWS resource.
 
 The sync process involves three key steps: Ingesting (i.e. Bedrock takes the data from S3), Processing (i.e. Bedrock chunks and embeds the data) and Storing (i.e. Bedrock stores the processed data in my vector store, OpenSearch Serverless).
 
@@ -79,9 +87,9 @@ The sync process involves three key steps: Ingesting (i.e. Bedrock takes the dat
 
 ## Testing My Chatbot
 
-initially tried to test my chatbot using Llama 3.1 8B as the AI model, but it triggered an error – it was not available on demand. I had to switch to Llama 3.3 70B because it was offered on-demand by AWS (since it’s a newer, efficient model).
+The original exercise reports an invocation error with Llama 3.1 8B and a switch to Llama 3.3 70B. This records the troubleshooting performed at the time; it does not assert current model availability or comparative efficiency.
 
-When I asked about topics unrelated to my Knowledge Base's data, my chatbot responds that it cannot help me with this request. This proves that the chatbot only knows the information that I gave it – it won’t know even common knowledge outside.
+The lab notes report a refusal for an out-of-scope question. A single example does not establish that the model is restricted to the supplied documents, that all answers are grounded, or that hallucinations are prevented. No systematic evaluation results are included.
 
 I can also turn off the Generate Responses setting to see the raw chunks of data directly from my Knowledge Base. When I tested this, my chatbot gave a list of 5 paragraphs to answer a question, whereas the AI model will convert it to a sentence.
 
@@ -91,11 +99,11 @@ I can also turn off the Generate Responses setting to see the raw chunks of data
 
 ## Upgrading My Chatbot
 
-In a project extension, I looked into increasing the number of source chunks, which are the number of chunks of text that the Knowledge Base will return for a query. This will improve my chatbot’s responses by giving my AI model more data to use.
+In an extension, I explored the number of retrieved source chunks and the generation prompt. These are configuration choices to evaluate against representative questions; more retrieved text does not by itself establish a better answer.
 
 I also added a custom prompt that tells my chatbot to always respond by mentioning skills that the student’s learnt, even if the student didn’t ask for it directly. I also gave context that the database contains documentation for projects.
 
-After adjusting the source chunks and the generation prompt, my chatbot’s response became so much more detailed! The chatbot would talk about skills I’ve learnt, and used 10 or more examples within the response.
+The notes report a more detailed response after those adjustments. This is a qualitative observation, not a measured improvement in retrieval relevance, groundedness or answer quality.
 
 ![Image](http://learn.nextwork.org/serene_orange_smart_fox/uploads/ai-rag-bedrock_improved-response)
 
